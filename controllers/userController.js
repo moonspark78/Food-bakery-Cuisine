@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 
+
 // READ user
 const fetchUser = async (req, res) =>{
     let user = await User.find({})
@@ -84,8 +85,13 @@ const loginUser = async (req, res) =>{
 };
 
 // LOGOUT user
-const logoutUser = async (req, res) =>{
-
+const logoutUser =  async  (req, res) =>{
+    // Effacer l'en-tête Authorization
+    res.set("Authorization", "");
+    res.status(200).send({
+        success: true,
+        message: "User is logout",
+    })
 };
 
 // Get user by ID
