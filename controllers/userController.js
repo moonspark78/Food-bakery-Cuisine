@@ -87,11 +87,13 @@ const loginUser = async (req, res) =>{
 // LOGOUT user
 const logoutUser =  async  (req, res) =>{
     // Effacer l'en-tête Authorization
-    res.set("Authorization", "");
+    req.logout();
+    res.redirect('/');
+    /* res.set("Authorization", "");
     res.status(200).send({
         success: true,
         message: "User is logout",
-    })
+    }) */
 };
 
 // Get user by ID
