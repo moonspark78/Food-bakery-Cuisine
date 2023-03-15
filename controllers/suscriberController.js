@@ -4,7 +4,7 @@ const Subscriber = require("../models/subscriberModel")
 
 // GET ALL SUSCRIBER
 const fetchSuscriber = async (req, res) =>{
-    let suscriber = await Subscriber.find({})
+    let suscriber = await Subscriber.find({}).populate("Course") 
     return res.status(200).send({
         success: true,
         suscriber,
@@ -22,7 +22,7 @@ const createSuscriber = async (req,res) =>{
                 message: "Il manque des données"
             });
         }
-        let suscriber = new Subscriber({name, email, zipCode, course }) 
+        let suscriber = new Subscriber({name, email, zipCode}) 
         await suscriber.save();
         const token = jwt.sign({suscriber_id: suscriber.id, email}, process.env.TOKEN_KEY, {expiresIn: "3h"})
         user.token = token;

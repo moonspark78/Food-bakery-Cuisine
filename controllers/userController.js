@@ -1,6 +1,7 @@
 const User = require("../models/userModel")
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Subscriber = require("../models/subscriberModel");
 
 
 
@@ -13,37 +14,47 @@ const fetchUser = async (req, res) =>{
     });
 };
 
-// CREATE AUTHOR
+// CREATE user
 const createUser = async (req,res) =>{
     try {
-        const {name,lastName, email, zipCode, password, coursesId} = req.body;
-        if(!name || !lastName || !email || !zipCode || !password || !coursesId) {
+        const {name,lastName, email, zipCode, password} = req.body;
+        if(!name || !lastName || !email || !zipCode || !password ) {
             return res.status(400).send({
                 success: false, 
                 message: "Il manque des données"
             });
         } 
-        const oldUser = await User.findOne({email})
+        /*  const oldUser = await User.findOne({email})
         if(oldUser){
             return res.status(200).send({
                 success: false, 
                 message: "User already exists, please login"
             })
-        }
+        } */
         // Hashé le mdp
         const hashedPassword =  await bcrypt.hash(password, 10);
         // Creer le user donc le SAVE
-        const user = await User.create({name, lastName, email: email.toLowerCase(),courses:coursesId, password : hashedPassword});
+        const user = await User.create({name, lastName, email, password : hashedPassword});
         
+        // push in suscriberAccount
+        const isSuscribe = await Subscriber.findOne({email});
+        if(isSuscribe){
+            user.subscribedAccount=  isSuscribe._id;
+        }
+
+
         // Mettre le JWT
         const token = jwt.sign({user_id: user.id, email}, process.env.TOKEN_KEY, {expiresIn: "3h"})
         user.token = token;
+        await user.save();
         return res.status(200).send({
             success: true,
             message: "Un User a bien étais enregistrer",
             user,
             
         });
+
+         
     } catch (error) {
         res.status(500).send({
             success: false,
@@ -87,13 +98,13 @@ const loginUser = async (req, res) =>{
 // LOGOUT user
 const logoutUser =  async  (req, res) =>{
     // Effacer l'en-tête Authorization
-    req.logout();
-    res.redirect('/');
-    /* res.set("Authorization", "");
+    /* req.logout();
+    res.redirect('/'); */
+    res.set("Authorization", "");
     res.status(200).send({
         success: true,
         message: "User is logout",
-    }) */
+    }) 
 };
 
 // Get user by ID
